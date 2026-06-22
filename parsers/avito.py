@@ -3,22 +3,35 @@ import random
 import time
 from bs4 import BeautifulSoup
 from database import save_post, post_exists
+
+# Вставь сюда свои данные: http://логин:пароль@ip:порт
 PROXY = "http://fN5wao:FECguD@209.127.51.168:8000"
+
 def parse_avito(query_url):
     print(f"[*] --- НАЧАЛО ДИАГНОСТИКИ АВИТО ---")
-    scraper = cloudscraper.create_scraper(browser={'browser': 'chrome', 'platform': 'windows', 'desktop': True})
+    
+    # Настройка прокси
+    proxies = {
+        "http": PROXY,
+        "https": PROXY
+    }
+    
+    scraper = cloudscraper.create_scraper(
+        browser={
+            'browser': 'chrome', 
+            'platform': 'windows', 
+            'desktop': True
+        }
+    )
     
     try:
         time.sleep(random.uniform(5, 10))
-        response = scraper.get(query_url, timeout=20)
+        # Запрос с использованием прокси
+        response = scraper.get(query_url, proxies=proxies, timeout=20)
         
-        # 1. Видим статус
         print(f"[*] Статус: {response.status_code}")
-        
-        # 2. Видим размер ответа
         print(f"[*] Размер HTML: {len(response.text)} символов")
         
-        # 3. Проверка на капчу (если Авито подсунул её)
         if "captcha" in response.text.lower() or "защита от ботов" in response.text:
             print("[!] ОБНАРУЖЕНА КАПЧА ИЛИ ЗАЩИТА!")
             return
@@ -30,11 +43,9 @@ def parse_avito(query_url):
         soup = BeautifulSoup(response.text, "html.parser")
         items = soup.select('div[data-marker="item"]')
         
-        # 4. Видим, сколько именно карточек нашлось
         print(f"[*] Найдено карточек: {len(items)}")
         
         if len(items) == 0:
-            # Выведем начало страницы, чтобы я увидел, что там вообще за структура
             print(f"[*] Текст начала страницы: {response.text[:200]}")
             print("[!] Внимание: Селектор div[data-marker='item'] не сработал!")
 
