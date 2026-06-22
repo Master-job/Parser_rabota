@@ -3,7 +3,7 @@ import random
 import time
 from bs4 import BeautifulSoup
 from database import save_post, post_exists
-
+PROXY = "http://fN5wao:FECguD@209.127.51.168:8000"
 def parse_avito(query_url):
     print(f"[*] --- НАЧАЛО ДИАГНОСТИКИ АВИТО ---")
     scraper = cloudscraper.create_scraper(browser={'browser': 'chrome', 'platform': 'windows', 'desktop': True})
