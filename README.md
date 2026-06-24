@@ -1,0 +1,1 @@
+Стек: (Python, FastAPI, Playwright, PostgreSQL).
