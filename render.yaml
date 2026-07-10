@@ -2,5 +2,6 @@ services:
   - type: web
     name: furniture-crm
     env: python
+    runtime: python-3.11.9
     buildCommand: pip install -r requirements.txt
     startCommand: python main.py
