@@ -65,7 +65,16 @@ async def handle_messages(message: types.Message):
         }
 
         send_to_crm(payload)
-
+        
+async def parse_channels_async():
+    """
+    Совместимость с CRM.
+    Telegram-бот работает через polling отдельно.
+    Здесь возвращаем пустой список,
+    чтобы FastAPI мог запуститься.
+    """
+    return []
+    
 if __name__ == '__main__':
     # Перед запуском убедись, что библиотека aiogram установлена: pip install aiogram==2.25.1
     executor.start_polling(dp, skip_updates=True)
