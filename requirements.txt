@@ -6,6 +6,7 @@ cloudscraper
 fastapi
 uvicorn
 aiogram==2.25.1
+aiohttp<3.10
 aiosqlite
 python-multipart
 python-dotenv
