@@ -79,7 +79,9 @@ def run():
 
     sent = 0
 
-
+if already_sent(item["link"]):
+    print("⏩ Уже публиковали:", item["title"])
+    continue
 
     for item in posts:
 
