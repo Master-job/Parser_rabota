@@ -5,7 +5,7 @@ psycopg2-binary
 cloudscraper
 fastapi
 uvicorn
-aiogram==2.25.1
+aiogram>=3.0
 aiosqlite
 python-multipart
 python-dotenv
