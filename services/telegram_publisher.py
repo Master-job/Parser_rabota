@@ -74,10 +74,7 @@ def run():
     ) as f:
 
         posts = json.load(f)
-
-
-
-            sent = 0
+                 sent = 0
         
         if already_sent(item["link"]):
             print("⏩ Уже публиковали:", item["title"])
