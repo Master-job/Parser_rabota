@@ -75,6 +75,14 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+@app.get("/")
+async def home():
+    return {
+        "status": "online",
+        "service": "LEAD GENERATOR PRO v3.0",
+        "database": "connected"
+    }
+    
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
