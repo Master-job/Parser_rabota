@@ -1,55 +1,43 @@
 import json
 import os
-import re
 import requests
 from dotenv import load_dotenv
 
 load_dotenv()
 
 INPUT_FILE = "telegram_preview.json"
-SENT_FILE = "sent_ids.txt"
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHANNEL_ID = os.getenv("TELEGRAM_CHANNEL_ID")
 
 MIN_SCORE = 70
 
-
-def get_avito_id(link):
-    """
-    Из ссылки Авито получает ID объявления.
-    Например:
-    https://www.avito.ru/..._7634504228?context=...
-    ->
-    7634504228
-    """
-    if not link:
-        return None
-
-    match = re.search(r"_(\d+)", link)
-
-    if match:
-        return match.group(1)
-
-    return None
+SENT_LINKS_FILE = "sent_links.txt"
 
 
-def load_sent():
-    if not os.path.exists(SENT_FILE):
+def load_sent_links():
+    if not os.path.exists(SENT_LINKS_FILE):
         return set()
 
-    with open(SENT_FILE, "r", encoding="utf-8") as f:
-        return {line.strip() for line in f if line.strip()}
+    with open(SENT_LINKS_FILE, "r", encoding="utf-8") as f:
+        return set(
+            line.strip()
+            for line in f
+            if line.strip()
+        )
 
 
-def save_sent(avito_id):
-    with open(SENT_FILE, "a", encoding="utf-8") as f:
-        f.write(avito_id + "\n")
+def save_sent_link(link):
+    with open(SENT_LINKS_FILE, "a", encoding="utf-8") as f:
+        f.write(link + "\n")
 
 
 def send_message(text):
 
-    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    url = (
+        f"https://api.telegram.org/"
+        f"bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    )
 
     data = {
         "chat_id": TELEGRAM_CHANNEL_ID,
@@ -66,51 +54,118 @@ def send_message(text):
     return response.json()
 
 
+def create_post(item):
+
+    title = item.get("title", "Новая вакансия")
+    link = item.get("link", "")
+    score = item.get("score", 0)
+
+    text = f"""
+🔥 НОВАЯ ВАКАНСИЯ В МОСКВЕ
+
+💼 {title}
+
+📍 Москва
+
+🔨 Направление:
+Сборка и монтаж мебели
+
+💰 Условия:
+Уточняются в вакансии
+
+⭐ Рейтинг:
+{score}/100
+
+👇 Открыть вакансию:
+{link}
+
+
+#работаМосква
+#сборщикмебели
+#монтажникмебели
+#вакансии
+"""
+
+    return text.strip()
+
+
 def run():
 
     if not os.path.exists(INPUT_FILE):
         print("Нет файла:", INPUT_FILE)
         return
 
-    with open(INPUT_FILE, "r", encoding="utf-8") as f:
+
+    with open(
+        INPUT_FILE,
+        "r",
+        encoding="utf-8"
+    ) as f:
         posts = json.load(f)
 
-    sent_ids = load_sent()
+
+    sent_links = load_sent_links()
 
     sent = 0
 
+
     for item in posts:
 
-        score = item.get("score", 0)
+        link = item.get("link")
+
+        if not link:
+            continue
+
+
+        if link in sent_links:
+            print(
+                "⏩ Уже было:",
+                item.get("title")
+            )
+            continue
+
+
+        score = item.get(
+            "score",
+            0
+        )
+
 
         if score < MIN_SCORE:
             continue
 
-        link = item.get("link", "")
-        avito_id = get_avito_id(link)
 
-        if avito_id and avito_id in sent_ids:
-            print("⏩ Уже публиковали:", item["title"])
-            continue
+        post = create_post(item)
 
-        result = send_message(item["post"])
+
+        result = send_message(post)
+
 
         if result.get("ok"):
 
-            print("✅ Отправлено:", item["title"])
+            print(
+                "✅ Отправлено:",
+                item.get("title")
+            )
+
+            save_sent_link(link)
 
             sent += 1
 
-            if avito_id:
-                save_sent(avito_id)
-                sent_ids.add(avito_id)
 
         else:
 
-            print("❌ Ошибка:", result)
+            print(
+                "❌ Ошибка:",
+                result
+            )
+
 
     print("====================")
-    print("Отправлено:", sent)
+    print(
+        "Отправлено:",
+        sent
+    )
 
 
 if __name__ == "__main__":
