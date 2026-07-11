@@ -19,6 +19,9 @@ def format_post(vacancy):
     category = detect_category(title)
     link = vacancy.get("link", "")
     metro = vacancy.get("metro", "Москва").strip()
+    # --- ДОБАВЬ ВОТ ЭТУ СТРОЧКУ ДЛЯ ОЧИСТКИ ССЫЛКИ ---
+    if link and "?" in link:
+        link = link.split("?")[0]
 
     # Форматируем красивый заголовок в зависимости от цены
     if "25 000" in salary or "30 000" in salary:
