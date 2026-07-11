@@ -56,22 +56,23 @@ def send_message(text):
 
 def create_post(item):
 
-    title = item.get("title", "Новая вакансия")
-    link = item.get("link", "")
+    title = item.get("title", "Вакансия")
     score = item.get("score", 0)
+    link = item.get("link", "")
 
-    text = f"""
-🔥 НОВАЯ ВАКАНСИЯ В МОСКВЕ
+    # чистим длинный хвост Avito
+    if "?" in link:
+        link = link.split("?")[0]
 
-💼 {title}
+    post = f"""🔥 {title.upper()}
 
 📍 Москва
 
-🔨 Направление:
-Сборка и монтаж мебели
+💰 Оплата:
+{item.get("salary", "Указана в вакансии")}
 
-💰 Условия:
-Уточняются в вакансии
+🛠 Направление:
+Сборка и монтаж мебели
 
 ⭐ Рейтинг:
 {score}/100
@@ -79,14 +80,9 @@ def create_post(item):
 👇 Открыть вакансию:
 {link}
 
+#работаМосква #сборщикмебели #монтажникмебели #кухни"""
 
-#работаМосква
-#сборщикмебели
-#монтажникмебели
-#вакансии
-"""
-
-    return text.strip()
+    return post
 
 
 def run():
