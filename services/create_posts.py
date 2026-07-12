@@ -1,7 +1,8 @@
 import json
 import os
 
-INPUT_FILE = "vacancies_salary.json"
+# ЧИТАЕМ ТО, ЧТО РЕАЛЬНО СОЗДАЛ SCORER.PY
+INPUT_FILE = "vacancies_ready.json"
 OUTPUT_FILE = "telegram_preview.json"
 
 def detect_category(title):
@@ -14,36 +15,31 @@ def detect_category(title):
 
 def format_post(vacancy):
     title = vacancy.get("title", "Разовый заказ").strip()
-    salary = vacancy.get("salary_text", "По договоренности").strip()
+    # Так как в твоей структуре поле называется 'text' или 'salary', подстрахуемся:
+    salary = vacancy.get("salary_text") or vacancy.get("salary") or "По договоренности"
     score = vacancy.get("score", 0)
     category = detect_category(title)
     link = vacancy.get("link", "").strip()
     metro = vacancy.get("metro", "Москва").strip()
 
-    # Жесткое отсечение любого мусора в ссылке
-    if link:
-        # Если в ссылке есть знак вопроса (параметры трекинга)
-        if "?" in link:
-            link = link.split("?")[0]
-        # На всякий случай убираем пробелы, которые могли остаться
-        link = link.strip()
+    # Срезаем хвосты Авито прямо на корню
+    if link and "?" in link:
+        link = link.split("?")[0]
 
-    if "25 000" in salary or "30 000" in salary:
+    if "25 000" in str(salary) or "30 000" in str(salary):
         header = f"💰 🔥 ЖИРНЫЙ ЗАКАЗ: {title.upper()}"
     else:
         header = f"⚡ НОВЫЙ ЗАКАЗ: {title.upper()}"
 
     post = f"""<b>{header}</b>
 
-🔥 <i>Отличный прямой заказ для мастера со своим инструментом! Без посредников и b2b-спама.</i>
+🔥 <i>Отличный прямой заказ для мастера со своим инструментом! Без посредников.</i>
 
 📍 <b>Локация:</b> {metro}
 🛠 <b>Направление:</b> {category}
 💵 <b>Бюджет / Оплата:</b> <u>{salary}</u>
 
 ⭐ <b>Надежность заказа:</b> {score}/100 (Высокий приоритет)
-
-⚠️ <b>Условия:</b> Прямой контакт с частным клиентом. Выплаты сразу по факту выполнения работы.
 
 🟢 <b>Успей перехватить объект в работу:</b>
 👉 <a href="{link}">НАЖМИ ТУТ, ЧТОБЫ ОТКРЫТЬ ВАКАНСИЮ</a>
@@ -66,7 +62,7 @@ def run():
         result.append({
             "title": vacancy.get("title"),
             "score": vacancy.get("score"),
-            "link": vacancy.get("link"), # Оставляем линк для проверки в паблишере
+            "link": vacancy.get("link"),
             "post": post
         })
 
@@ -74,11 +70,8 @@ def run():
         json.dump(result, f, ensure_ascii=False, indent=4)
 
     print("====================")
-    print("Готово постов:", len(result))
+    print("Успешно сформировано постов:", len(result))
     print("====================")
-
-    for item in result[:2]:
-        print("\n" + item["post"] + "\n--------------------")
 
 if __name__ == "__main__":
     run()
