@@ -10,3 +10,4 @@ aiosqlite
 python-multipart
 asyncpg
 python-dotenv
+playwright
