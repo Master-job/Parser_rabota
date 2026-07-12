@@ -2,9 +2,9 @@ import subprocess
 import sys
 
 
-def run(script, ignore_errors=False):
+def run(script):
     print("\n" + "=" * 60)
-    print(f"▶ Запуск: {script}")
+    print("▶ Запуск:", script)
     print("=" * 60)
 
     result = subprocess.run(
@@ -12,19 +12,16 @@ def run(script, ignore_errors=False):
     )
 
     if result.returncode != 0:
-        print(f"❌ Ошибка в скрипте: {script}")
-        if not ignore_errors:
-            exit(1)
-        else:
-            print(f"⚠️ Ошибка проигнорирована, конвейер продолжается...")
-    else:
-        print(f"✅ Готово: {script}")
+        print("❌ Ошибка:", script)
+        exit(1)
+
+    print("✅ Готово:", script)
 
 
 def main():
 
-    # 1. Парсим Авито (Ставим True, чтобы падение Playwright на Render не ломало всё ядро)
-    run("parsers/avito_parser.py", ignore_errors=True)
+    # 1. Парсим Авито (теперь строго на ПК, собирает новые цены!)
+    run("parsers/avito_parser.py")
 
     # 2. Фильтруем вакансии
     run("services/filter_jobs.py")
